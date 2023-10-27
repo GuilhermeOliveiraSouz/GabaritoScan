@@ -27,6 +27,7 @@
     <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
@@ -76,23 +77,13 @@
             gabaritoDiv.innerText = JSON.stringify(gabarito, null, 2);
         });
 
-gerarQRCodeGabaritoBtn.addEventListener('click', () => {
-    const gabaritoJSON = JSON.stringify(gabarito);
-    const qrCanvas = document.createElement('canvas');
-    qrCanvas.width = 200; // Defina a largura do canvas
-    qrCanvas.height = 200; // Defina a altura do canvas
+        gerarQRCodeGabaritoBtn.addEventListener('click', () => {
+            const gabaritoJSON = JSON.stringify(gabarito);
+            const qrCanvas = document.createElement('canvas');
 
-    const qrcode = new QRCode(qrCanvas, {
-        text: gabaritoJSON,
-        width: 200, // Largura do QR Code
-        height: 200, // Altura do QR Code
-    });
-
-    // Adicione o canvas ao corpo da página
-    document.body.appendChild(qrCanvas);
-});
-
-
+            new QRCode(qrCanvas, gabaritoJSON);
+            document.body.appendChild(qrCanvas);
+        });
 
         async function processVideo() {
             try {
