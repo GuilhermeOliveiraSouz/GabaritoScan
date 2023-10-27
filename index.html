@@ -11,16 +11,37 @@
     <div id="qrResult">Resultado QR Code:</div>
     <button id="iniciarLeitura">Iniciar Leitura</button>
     <button id="pararLeitura">Parar Leitura</button>
+
+    <h1>Criador de Gabarito</h1>
+    <label for="questao">Questão:</label>
+    <input type="text" id="questao">
+    <br>
+    <label for="resposta">Resposta Correta:</label>
+    <input type="text" id="resposta">
+    <br>
+    <button id="adicionarQuestao">Adicionar Questão</button>
+    <button id="gerarGabarito">Gerar Gabarito</button>
+    <button id="gerarQRCodeGabarito">Gerar QR Code Gabarito</button>
+    <div id="gabarito"></div>
+
     <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const qrResult = document.getElementById('qrResult');
         const iniciarLeituraBtn = document.getElementById('iniciarLeitura');
         const pararLeituraBtn = document.getElementById('pararLeitura');
+        const questaoInput = document.getElementById('questao');
+        const respostaInput = document.getElementById('resposta');
+        const adicionarQuestaoBtn = document.getElementById('adicionarQuestao');
+        const gerarGabaritoBtn = document.getElementById('gerarGabarito');
+        const gerarQRCodeGabaritoBtn = document.getElementById('gerarQRCodeGabarito');
+        const gabaritoDiv = document.getElementById('gabarito');
 
         let videoStream;
+        let gabarito = { questoes: [], respostas: [] };
 
         iniciarLeituraBtn.addEventListener('click', async () => {
             try {
@@ -41,6 +62,32 @@
             iniciarLeituraBtn.disabled = false;
             pararLeituraBtn.disabled = true;
         });
+
+        adicionarQuestaoBtn.addEventListener('click', () => {
+            const questao = questaoInput.value;
+            const resposta = respostaInput.value;
+            gabarito.questoes.push(questao);
+            gabarito.respostas.push(resposta);
+            questaoInput.value = '';
+            respostaInput.value = '';
+        });
+
+        gerarGabaritoBtn.addEventListener('click', () => {
+            gabaritoDiv.innerText = JSON.stringify(gabarito, null, 2);
+        });
+
+        gerarQRCodeGabaritoBtn.addEventListener('click', () => {
+             const gabaritoJSON = JSON.stringify(gabarito);
+            const qrCanvas = document.createElement('canvas');
+            qrcode.toCanvas(qrCanvas, gabaritoJSON, function (error) {
+            if (error) {
+            console.error(error);
+            } else {
+            document.body.appendChild(qrCanvas);
+        }
+    });
+});
+
 
         async function processVideo() {
             try {
