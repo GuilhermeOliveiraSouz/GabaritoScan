@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Correção de Provas</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -14,8 +13,7 @@
     <main>
         <section id="camera">
             <h2>Leitura de Gabarito</h2>
-            <video id="video" autoplay></video>
-            <canvas id="canvas" style="display: none;"></canvas>
+            <video id="video"></video>
             <div id="qrResult">Resultado QR Code:</div>
             <button id="iniciarLeitura">Iniciar Leitura</button>
             <button id="pararLeitura">Parar Leitura</button>
@@ -36,9 +34,8 @@
         <p>&copy; 2023 Correção de Provas</p>
     </footer>
 
-    <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
-    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="instascan.min.js"></script>
+    <script src="qrcode.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
