@@ -16,7 +16,7 @@
     <label for="questao">Questão:</label>
     <input type="text" id="questao">
     <br>
-    <label for="resposta">Resposta Correta:</label>
+    <label for "resposta">Resposta Correta:</label>
     <input type="text" id="resposta">
     <br>
     <button id="adicionarQuestao">Adicionar Questão</button>
@@ -26,7 +26,6 @@
 
     <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
-    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <script>
         const video = document.getElementById('video');
@@ -80,9 +79,14 @@
         gerarQRCodeGabaritoBtn.addEventListener('click', () => {
             const gabaritoJSON = JSON.stringify(gabarito);
             const qrCanvas = document.createElement('canvas');
-
-            new QRCode(qrCanvas, gabaritoJSON);
+            qrCanvas.id = "qrcode";
             document.body.appendChild(qrCanvas);
+
+            const qrcode = new QRCode(document.getElementById("qrcode"), {
+                text: gabaritoJSON,
+                width: 128,
+                height: 128
+            });
         });
 
         async function processVideo() {
