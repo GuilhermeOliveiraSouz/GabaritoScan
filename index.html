@@ -79,11 +79,19 @@
 gerarQRCodeGabaritoBtn.addEventListener('click', () => {
     const gabaritoJSON = JSON.stringify(gabarito);
     const qrCanvas = document.createElement('canvas');
+    qrCanvas.width = 200; // Defina a largura do canvas
+    qrCanvas.height = 200; // Defina a altura do canvas
 
-    new QRCode(qrCanvas, gabaritoJSON);
+    const qrcode = new QRCode(qrCanvas, {
+        text: gabaritoJSON,
+        width: 200, // Largura do QR Code
+        height: 200, // Altura do QR Code
+    });
 
+    // Adicione o canvas ao corpo da página
     document.body.appendChild(qrCanvas);
 });
+
 
 
         async function processVideo() {
