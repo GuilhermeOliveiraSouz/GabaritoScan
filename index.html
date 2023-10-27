@@ -21,13 +21,11 @@
         const pararLeituraBtn = document.getElementById('pararLeitura');
 
         let videoStream;
-        let cap;
 
         iniciarLeituraBtn.addEventListener('click', async () => {
             try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 video.srcObject = videoStream;
-                cap = new cv.VideoCapture(video);
                 iniciarLeituraBtn.disabled = true;
                 pararLeituraBtn.disabled = false;
                 processVideo();
@@ -46,25 +44,35 @@
 
         async function processVideo() {
             try {
-                if (!cap.grab()) {
+                const stream = video.srcObject;
+                if (!stream) return;
+                const track = stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                console.log('Current camera settings:', settings);
+                if (settings.facingMode !== 'environment') {
+                    console.error('Camera facing mode is not the primary camera.');
                     return;
                 }
 
-                const frame = new cv.Mat();
-                cap.read(frame);
+                const imageCapture = new ImageCapture(track);
+                const photoBlob = await imageCapture.takePhoto();
 
-                const canvasElement = document.getElementById('canvas');
-                const context = canvasElement.getContext('2d');
-                cv.imshow(canvasElement, frame);
+                const img = new Image();
+                img.src = URL.createObjectURL(photoBlob);
 
-                const imgData = context.getImageData(0, 0, frame.cols, frame.rows);
-                const qrCode = jsQR(imgData.data, frame.cols, frame.rows);
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+                    const imgData = canvas.getContext('2d').getImageData(0, 0, img.width, img.height);
+                    const qrCode = jsQR(imgData.data, img.width, img.height);
 
-                if (qrCode) {
-                    qrResult.textContent = 'Resultado QR Code: ' + qrCode.data;
-                }
+                    if (qrCode) {
+                        qrResult.textContent = 'Resultado QR Code: ' + qrCode.data;
+                    }
 
-                requestAnimationFrame(processVideo);
+                    requestAnimationFrame(processVideo);
+                };
             } catch (error) {
                 console.error(error);
             }
