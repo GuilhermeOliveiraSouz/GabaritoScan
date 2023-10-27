@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Leitura de Gabarito</title>
+</head>
+<body>
+    <h1>Leitura de Gabarito</h1>
+    <video id="video" width="300" height="225" autoplay></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="qrResult">Resultado QR Code:</div>
+    <button id="iniciarLeitura">Iniciar Leitura</button>
+    <button id="pararLeitura">Parar Leitura</button>
+    <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const qrResult = document.getElementById('qrResult');
+        const iniciarLeituraBtn = document.getElementById('iniciarLeitura');
+        const pararLeituraBtn = document.getElementById('pararLeitura');
+
+        let videoStream;
+        let cap;
+
+        iniciarLeituraBtn.addEventListener('click', async () => {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = videoStream;
+                cap = new cv.VideoCapture(video);
+                iniciarLeituraBtn.disabled = true;
+                pararLeituraBtn.disabled = false;
+                processVideo();
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        pararLeituraBtn.addEventListener('click', () => {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            iniciarLeituraBtn.disabled = false;
+            pararLeituraBtn.disabled = true;
+        });
+
+        async function processVideo() {
+            try {
+                if (!cap.grab()) {
+                    return;
+                }
+
+                const frame = new cv.Mat();
+                cap.read(frame);
+
+                const canvasElement = document.getElementById('canvas');
+                const context = canvasElement.getContext('2d');
+                cv.imshow(canvasElement, frame);
+
+                const imgData = context.getImageData(0, 0, frame.cols, frame.rows);
+                const qrCode = jsQR(imgData.data, frame.cols, frame.rows);
+
+                if (qrCode) {
+                    qrResult.textContent = 'Resultado QR Code: ' + qrCode.data;
+                }
+
+                requestAnimationFrame(processVideo);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
