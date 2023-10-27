@@ -2,128 +2,43 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Leitura de Gabarito</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção de Provas</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Leitura de Gabarito</h1>
-    <video id="video" width="300" height="225" autoplay></video>
-    <canvas id="canvas" style="display: none;"></canvas>
-    <div id="qrResult">Resultado QR Code:</div>
-    <button id="iniciarLeitura">Iniciar Leitura</button>
-    <button id="pararLeitura">Parar Leitura</button>
+    <header>
+        <h1>Correção de Provas</h1>
+    </header>
 
-    <h1>Criador de Gabarito</h1>
-    <label for="questao">Questão:</label>
-    <input type="text" id="questao">
-    <br>
-    <label for "resposta">Resposta Correta:</label>
-    <input type="text" id="resposta">
-    <br>
-    <button id="adicionarQuestao">Adicionar Questão</button>
-    <button id="gerarGabarito">Gerar Gabarito</button>
-    <button id="gerarQRCodeGabarito">Gerar QR Code Gabarito</button>
-    <div id="gabarito"></div>
+    <main>
+        <section id="camera">
+            <h2>Leitura de Gabarito</h2>
+            <video id="video" autoplay></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <div id="qrResult">Resultado QR Code:</div>
+            <button id="iniciarLeitura">Iniciar Leitura</button>
+            <button id="pararLeitura">Parar Leitura</button>
+        </section>
+
+        <section id="gabarito">
+            <h2>Criador de Gabarito</h2>
+            <input type="text" id="questao" placeholder="Questão">
+            <input type="text" id="resposta" placeholder="Resposta Correta">
+            <button id="adicionarQuestao">Adicionar Questão</button>
+            <button id="gerarGabarito">Gerar Gabarito</button>
+            <button id="gerarQRCodeGabarito">Gerar QR Code Gabarito</button>
+            <div id="gabaritoDiv"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Correção de Provas</p>
+    </footer>
 
     <script src="https://rawgit.com/cozmo/jsQR/master/dist/jsQR.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv/4.5.1/opencv.js"></script>
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const qrResult = document.getElementById('qrResult');
-        const iniciarLeituraBtn = document.getElementById('iniciarLeitura');
-        const pararLeituraBtn = document.getElementById('pararLeitura');
-        const questaoInput = document.getElementById('questao');
-        const respostaInput = document.getElementById('resposta');
-        const adicionarQuestaoBtn = document.getElementById('adicionarQuestao');
-        const gerarGabaritoBtn = document.getElementById('gerarGabarito');
-        const gerarQRCodeGabaritoBtn = document.getElementById('gerarQRCodeGabarito');
-        const gabaritoDiv = document.getElementById('gabarito');
-
-        let videoStream;
-        let gabarito = { questoes: [], respostas: [] };
-
-        iniciarLeituraBtn.addEventListener('click', async () => {
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                video.srcObject = videoStream;
-                iniciarLeituraBtn.disabled = true;
-                pararLeituraBtn.disabled = false;
-                processVideo();
-            } catch (error) {
-                console.error(error);
-            }
-        });
-
-        pararLeituraBtn.addEventListener('click', () => {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            iniciarLeituraBtn.disabled = false;
-            pararLeituraBtn.disabled = true;
-        });
-
-        adicionarQuestaoBtn.addEventListener('click', () => {
-            const questao = questaoInput.value;
-            const resposta = respostaInput.value;
-            gabarito.questoes.push(questao);
-            gabarito.respostas.push(resposta);
-            questaoInput.value = '';
-            respostaInput.value = '';
-        });
-
-        gerarGabaritoBtn.addEventListener('click', () => {
-            gabaritoDiv.innerText = JSON.stringify(gabarito, null, 2);
-        });
-
-        gerarQRCodeGabaritoBtn.addEventListener('click', () => {
-            const gabaritoJSON = JSON.stringify(gabarito);
-            const qrCanvas = document.createElement('canvas');
-            qrCanvas.id = "qrcode";
-            document.body.appendChild(qrCanvas);
-
-            const qrcode = new QRCode(document.getElementById("qrcode"), {
-                text: gabaritoJSON,
-                width: 128,
-                height: 128
-            });
-        });
-
-        async function processVideo() {
-            try {
-                const stream = video.srcObject;
-                if (!stream) return;
-                const track = stream.getVideoTracks()[0];
-                const settings = track.getSettings();
-                console.log('Current camera settings:', settings);
-                if (settings.facingMode !== 'environment') {
-                    console.error('Camera facing mode is not the primary camera.');
-                    return;
-                }
-
-                const imageCapture = new ImageCapture(track);
-                const photoBlob = await imageCapture.takePhoto();
-
-                const img = new Image();
-                img.src = URL.createObjectURL(photoBlob);
-
-                img.onload = () => {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-                    const imgData = canvas.getContext('2d').getImageData(0, 0, img.width, img.height);
-                    const qrCode = jsQR(imgData.data, img.width, img.height);
-
-                    if (qrCode) {
-                        qrResult.textContent = 'Resultado QR Code: ' + qrCode.data;
-                    }
-
-                    requestAnimationFrame(processVideo);
-                };
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
