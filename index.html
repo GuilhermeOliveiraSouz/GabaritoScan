@@ -76,16 +76,13 @@
             gabaritoDiv.innerText = JSON.stringify(gabarito, null, 2);
         });
 
-        gerarQRCodeGabaritoBtn.addEventListener('click', () => {
-             const gabaritoJSON = JSON.stringify(gabarito);
-            const qrCanvas = document.createElement('canvas');
-            qrcode.toCanvas(qrCanvas, gabaritoJSON, function (error) {
-            if (error) {
-            console.error(error);
-            } else {
-            document.body.appendChild(qrCanvas);
-        }
-    });
+gerarQRCodeGabaritoBtn.addEventListener('click', () => {
+    const gabaritoJSON = JSON.stringify(gabarito);
+    const qrCanvas = document.createElement('canvas');
+
+    new QRCode(qrCanvas, gabaritoJSON);
+
+    document.body.appendChild(qrCanvas);
 });
 
 
